@@ -1,50 +1,34 @@
-'use strict';
+'use strict'
 
-var Promise = require('bluebird');
-var concat = require('concat-stream');
-var debug = require('debug')('http-body-json-parse');
+const Promise = require('bluebird')
+const concat = require('concat-stream')
+const debug = require('debug')('http-body-json-parse')
+const {reject} = Promise
 
-parse.ContentTypeError = ContentTypeError;
-parse.ParsingError = ParsingError;
+parse.ContentTypeError = ContentTypeError
+parse.ParsingError = ParsingError
 
-module.exports = parse;
+module.exports = parse
 
-function parse( request ) {
-	if (request.headers['content-type'] !== 'application/json')
-		return Promise.reject(new ContentTypeError());
+function parse(request){
+	if (request.headers['content-type'] !== 'application/json') return reject(new ContentTypeError())
 
-	var parsed = new Promise(function( rslv ){
-		request.pipe(concat(rslv));
-	})
-		.then(JSON.parse)
-		.catch(SyntaxError, function(){
-			return Promise.reject(new ParsingError());
-		});
+	const raw = new Promise(rs => request.pipe(concat(rs)))
+	const parsed = raw.then(JSON.parse).catch(SyntaxError, () => reject(new ParsingError()))
 
-	if (!debug.enabled)
-		return parsed;
+	if (!debug.enabled) return parsed
 
-	debug('parsing body');
+	debug('parsing')
 
-	return parsed
-			.tap(function( data ) {
-				debug('parsed body to %o', data);
-			})
-			.catch(function( e ){
-				debug('failed to parse body');
-
-				throw e;
-			});
+	return parsed.tap(
+		data => debug('parsed to %o', data)
+	).tapCatch(
+		e => debug('failed: %s', e.message)
+	)
 }
 
-function ContentTypeError(){
-	this.message = 'Content-Type must be "application/json"';
-}
+function ContentTypeError(){ this.message = 'Content-Type must be "application/json"' }
+function ParsingError(){ this.message = 'Unable to parse JSON' }
 
-ContentTypeError.prototype = Object.create(Error.prototype);
-
-function ParsingError(){
-	this.message = 'Unable to parse JSON';
-}
-
-ParsingError.prototype = Object.create(Error.prototype);
+ContentTypeError.prototype = Object.create(Error.prototype)
+ParsingError.prototype = Object.create(Error.prototype)

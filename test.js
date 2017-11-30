@@ -1,51 +1,49 @@
-'use strict';
+'use strict'
 
-var http = require('http');
-var test = require('tape');
-var request = require('request');
-var parseBody = require('./');
+const http = require('http')
+const test = require('tape')
+const request = require('request')
+const parse = require('./')
 
-var server = http.createServer(function( request, response ){
-	response.setHeader('Content-Type', 'application/json');
+const server = http.createServer((request, response) => {
+	response.setHeader('Content-Type', 'application/json')
 
-	parseBody(request)
+	parse(request)
 		.then(json => response.end(JSON.stringify(json)))
-		.catch(parseBody.ContentTypeError, e => response.end('ContentTypeError: '+e.message))
-		.catch(parseBody.ParsingError, e => response.end('ParsingError: '+e.message));
+		.catch(parse.ContentTypeError, e => response.end('ContentTypeError: '+e.message))
+		.catch(parse.ParsingError, e => response.end('ParsingError: '+e.message))
 })
-	.listen(0);
+	.listen(0)
 
-test.onFinish(function(){
-	server.close();
-});
+test.onFinish(() => server.close())
 
-var host = new Promise(function( rslv ){
-	server.on('listening', () => rslv('http://localhost:'+server.address().port));
-});
+const host = new Promise(rslv =>
+	server.on('listening', () => rslv('http://localhost:'+server.address().port))
+)
 
-test(function( t ){
-	t.plan(1);
+test(t => {
+	t.plan(1)
 
-	var dummy = {
+	const dummy = {
 		key: 'value',
 		root: {
 			leaf: 'value',
 		},
-	};
+	}
 
-	requestMirror(dummy, ( err, body ) => t.deepEqual(body, dummy));
-});
+	requestMirror(dummy, (err, body) => t.deepEqual(body, dummy))
+})
 
-test('Empty object', function( t ){
-	t.plan(1);
+test('Empty object', t => {
+	t.plan(1)
 
-	var dummy = {};
+	const dummy = {}
 
-	requestMirror(dummy, ( err, body ) => t.deepEqual(body, dummy));
-});
+	requestMirror(dummy, (err, body) => t.deepEqual(body, dummy))
+})
 
-test('Throws on bad content type', function( t ){
-	t.plan(1);
+test('Throws on bad content type', t => {
+	t.plan(1)
 
 	host.then(host => request({
 		method: 'POST',
@@ -54,11 +52,11 @@ test('Throws on bad content type', function( t ){
 			'Content-Type': 'text/json',
 		},
 		body: '...',
-	}, ( err, res, body ) => t.equal(body, 'ContentTypeError: Content-Type must be "application/json"')));
-});
+	}, (err, res, body) => t.equal(body, 'ContentTypeError: Content-Type must be "application/json"')))
+})
 
-test('Throws on bad JSON', function( t ){
-	t.plan(1);
+test('Throws on bad JSON', t => {
+	t.plan(1)
 
 	host.then(host => request({
 		method: 'POST',
@@ -68,14 +66,17 @@ test('Throws on bad JSON', function( t ){
 		},
 		json: false,
 		body: '...',
-	}, ( err, res, body ) => t.equal(body, 'ParsingError: Unable to parse JSON')));
-});
+	}, (err, res, body) => t.equal(body, 'ParsingError: Unable to parse JSON')))
+})
 
-function requestMirror( body, cb ){
-	host.then(host => request({
-		method: 'POST',
-		uri: host,
-		json: true,
-		body: body,
-	}, ( err, res, body ) => cb(err, body)));
+function requestMirror(body, cb){
+	host.then(
+		host => request({
+			method: 'POST',
+			uri: host,
+			json: true,
+			body: body,
+		},
+		(err, res, body) => cb(err, body))
+	)
 }
