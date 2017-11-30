@@ -4,8 +4,6 @@ Parse the JSON body of an http request.
 
 ## Usage
 
-The result is cached and only ever parsed once per request.
-
 ```js
 var parseBody = require('http-body-json-parse');
 
