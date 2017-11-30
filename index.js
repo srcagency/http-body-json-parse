@@ -2,7 +2,7 @@
 
 var Promise = require('bluebird');
 var concat = require('concat-stream');
-var debug = require('debug')('http-body-parse');
+var debug = require('debug')('http-body-json-parse');
 
 parse.ContentTypeError = ContentTypeError;
 parse.ParsingError = ParsingError;
