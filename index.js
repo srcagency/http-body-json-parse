@@ -13,7 +13,10 @@ module.exports = parse
 function parse(request){
 	if (request.headers['content-type'] !== 'application/json') return reject(new ContentTypeError())
 
-	const raw = new Promise(rs => request.pipe(concat(rs)))
+	const raw = new Promise((rs, rj) => {
+		request.once('error', rj)
+		request.pipe(concat(rs))
+	})
 	const parsed = raw.then(JSON.parse).catch(SyntaxError, () => reject(new ParsingError()))
 
 	if (!debug.enabled) return parsed
