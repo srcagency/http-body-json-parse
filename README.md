@@ -13,5 +13,9 @@ http.createServer((request, response) => {
     else if (e instanceof parse.ParsingError) console.error(e.message)
     else throw e
   })
+
+  // introspection, great for post mortem
+  request[parse.parsing] // equal to parse(request)
+  request[parse.parsed] // equal to resolved parse(request)
 })
 ```

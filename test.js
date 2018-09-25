@@ -102,6 +102,22 @@ test('Forwards request stream errors', t => {
 	)
 })
 
+test('Introspection', t => {
+	t.plan(2)
+	let i = 0
+	const request = new Readable({
+		read(size) {
+			if (i++) return this.push(null)
+			return this.push(Buffer.from('{"a":"b"}'))
+		},
+	})
+	request.headers = {'content-type': 'application/json'}
+	const parsed = parse(request)
+	t.equal(request[parse.parsing], parsed)
+
+	parsed.then(() => t.deepEqual(request[parse.parsed], {a: 'b'}))
+})
+
 function requestMirror(body, cb) {
 	host.then(host =>
 		request(
