@@ -6,20 +6,27 @@ const test = require('tape')
 const request = require('request')
 const parse = require('./')
 
-const server = http.createServer((request, response) => {
-	response.setHeader('Content-Type', 'application/json')
+const server = http
+	.createServer((request, response) => {
+		response.setHeader('Content-Type', 'application/json')
 
-	parse(request)
-		.then(json => response.end(JSON.stringify(json)))
-		.catch(parse.ContentTypeError, e => response.end('ContentTypeError: '+e.message))
-		.catch(parse.ParsingError, e => response.end('ParsingError: '+e.message))
-})
+		parse(request)
+			.then(json => response.end(JSON.stringify(json)))
+			.catch(parse.ContentTypeError, e =>
+				response.end('ContentTypeError: ' + e.message)
+			)
+			.catch(parse.ParsingError, e =>
+				response.end('ParsingError: ' + e.message)
+			)
+	})
 	.listen(0)
 
 test.onFinish(() => server.close())
 
 const host = new Promise(rslv =>
-	server.on('listening', () => rslv('http://localhost:'+server.address().port))
+	server.on('listening', () =>
+		rslv('http://localhost:' + server.address().port)
+	)
 )
 
 test(t => {
@@ -46,28 +53,43 @@ test('Empty object', t => {
 test('Throws on bad content type', t => {
 	t.plan(1)
 
-	host.then(host => request({
-		method: 'POST',
-		uri: host,
-		headers: {
-			'Content-Type': 'text/json',
-		},
-		body: '...',
-	}, (err, res, body) => t.equal(body, 'ContentTypeError: Content-Type must be "application/json"')))
+	host.then(host =>
+		request(
+			{
+				method: 'POST',
+				uri: host,
+				headers: {
+					'Content-Type': 'text/json',
+				},
+				body: '...',
+			},
+			(err, res, body) =>
+				t.equal(
+					body,
+					'ContentTypeError: Content-Type must be "application/json"'
+				)
+		)
+	)
 })
 
 test('Throws on bad JSON', t => {
 	t.plan(1)
 
-	host.then(host => request({
-		method: 'POST',
-		uri: host,
-		headers: {
-			'Content-Type': 'application/json',
-		},
-		json: false,
-		body: '...',
-	}, (err, res, body) => t.equal(body, 'ParsingError: Unable to parse JSON')))
+	host.then(host =>
+		request(
+			{
+				method: 'POST',
+				uri: host,
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				json: false,
+				body: '...',
+			},
+			(err, res, body) =>
+				t.equal(body, 'ParsingError: Unable to parse JSON')
+		)
+	)
 })
 
 test('Handles request stream errors', t => {
@@ -77,7 +99,7 @@ test('Handles request stream errors', t => {
 		headers: {
 			'content-type': 'application/json',
 		},
-	});
+	})
 
 	parse(fakeRequest).then(
 		() => t.fail(),
@@ -85,24 +107,28 @@ test('Handles request stream errors', t => {
 	)
 })
 
-function requestMirror(body, cb){
-	host.then(
-		host => request({
-			method: 'POST',
-			uri: host,
-			json: true,
-			body: body,
-		},
-		(err, res, body) => cb(err, body))
+function requestMirror(body, cb) {
+	host.then(host =>
+		request(
+			{
+				method: 'POST',
+				uri: host,
+				json: true,
+				body: body,
+			},
+			(err, res, body) => cb(err, body)
+		)
 	)
 }
 
-function failingStream(){
+function failingStream() {
 	let i = 0
 	return new Readable({
-		read(size){
+		read(size) {
 			if (i++ === 0) return this.push(Buffer.from('abc', 'ascii'))
-			process.nextTick(() => this.emit('error', new Error('Deliberate error')))
-		}
+			process.nextTick(() =>
+				this.emit('error', new Error('Deliberate error'))
+			)
+		},
 	})
 }
