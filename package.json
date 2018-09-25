@@ -15,14 +15,14 @@
 		"parse"
 	],
 	"dependencies": {
-		"bluebird": "^3.5.1",
-		"concat-stream": "^1.6.0",
-		"debug": "^3.1.0"
+		"bluebird": "^3.5.2",
+		"concat-stream": "^1.6.2",
+		"debug": "^4.0.1"
 	},
 	"devDependencies": {
 		"prettier": "^1.14.3",
-		"request": "^2.83.0",
-		"tape": "^4.8.0"
+		"request": "^2.88.0",
+		"tape": "^4.9.1"
 	},
 	"prettier": {
 		"semi": false,
