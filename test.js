@@ -106,7 +106,7 @@ test('Introspection', t => {
 	t.plan(2)
 	let i = 0
 	const request = new Readable({
-		read(size) {
+		read() {
 			if (i++) return this.push(null)
 			return this.push(Buffer.from('{"a":"b"}'))
 		},
@@ -135,7 +135,7 @@ function requestMirror(body, cb) {
 function failingStream() {
 	let i = 0
 	return new Readable({
-		read(size) {
+		read() {
 			if (i++ === 0) return this.push(Buffer.from('abc', 'ascii'))
 			process.nextTick(() =>
 				this.emit('error', new Error('Deliberate error'))
