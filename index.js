@@ -29,15 +29,15 @@ function parse(request, log = () => {}) {
 
 	log('parsing')
 
-	const parsed = getStream(request)
-		.then(json => {
+	const parsed = getStream(request).then(json => {
+		try {
 			const data = JSON.parse(json)
 			log({data})
 			return data
-		})
-		.catch(e =>
-			Promise.reject(e instanceof SyntaxError ? new ParsingError() : e)
-		)
+		} catch (e) {
+			return Promise.reject(new ParsingError())
+		}
+	})
 
 	request[cache] = parsed
 
