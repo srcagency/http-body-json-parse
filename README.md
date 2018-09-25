@@ -8,9 +8,10 @@ Parse the JSON body of an http request.
 const parse = require('http-body-json-parse')
 
 http.createServer((request, response) => {
-  parse(request).then(console.log, e => {
+  parse(request, 50 /* bytes, optional */).then(console.log, e => {
     if (e instanceof parse.ContentTypeError) console.error(e.message)
     else if (e instanceof parse.ParsingError) console.error(e.message)
+    else if (e instanceof parse.BufferError) console.error(e.message)
     else throw e
   })
 

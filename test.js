@@ -118,6 +118,27 @@ test('Introspection', t => {
 	parsed.then(() => t.deepEqual(request[parse.parsed], {a: 'b'}))
 })
 
+test('Max buffer', t => {
+	t.plan(3)
+	let i = 0
+	const request = new Readable({
+		read() {
+			if (i++) return this.push(null)
+			return this.push(Buffer.from('{"a":"b"}'))
+		},
+	})
+	request.headers = {'content-type': 'application/json'}
+
+	parse(request, 2).then(
+		() => t.fail(),
+		e => {
+			t.ok(e instanceof parse.BufferError)
+			t.equal(e.name, 'BufferError')
+			t.equal(e.message, 'Buffer exhausted')
+		}
+	)
+})
+
 function requestMirror(body, cb) {
 	host.then(host =>
 		request(
