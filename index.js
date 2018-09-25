@@ -1,42 +1,45 @@
 'use strict'
 
-const Promise = require('bluebird')
-const concat = require('concat-stream')
-const debug = require('debug')('http-body-json-parse')
-const {reject} = Promise
+const getStream = require('get-stream')
+const cache = Symbol()
+
+class ContentTypeError extends Error {
+	constructor() {
+		super('Content-Type must be "application/json"')
+		this.name = this.constructor.name
+	}
+}
+class ParsingError extends Error {
+	constructor() {
+		super('Unable to parse JSON')
+		this.name = this.constructor.name
+	}
+}
 
 parse.ContentTypeError = ContentTypeError
 parse.ParsingError = ParsingError
 
 module.exports = parse
 
-function parse(request) {
-	if (request.headers['content-type'] !== 'application/json')
-		return reject(new ContentTypeError())
+function parse(request, log = () => {}) {
+	if (request[cache] !== undefined) return request[cache]
+	if (request.headers['content-type'] !== 'application/json') {
+		return Promise.reject(new ContentTypeError())
+	}
 
-	const raw = new Promise((rs, rj) => {
-		request.once('error', rj)
-		request.pipe(concat(rs))
-	})
-	const parsed = raw
-		.then(JSON.parse)
-		.catch(SyntaxError, () => reject(new ParsingError()))
+	log('parsing')
 
-	if (!debug.enabled) return parsed
+	const parsed = getStream(request)
+		.then(json => {
+			const data = JSON.parse(json)
+			log({data})
+			return data
+		})
+		.catch(e =>
+			Promise.reject(e instanceof SyntaxError ? new ParsingError() : e)
+		)
 
-	debug('parsing')
+	request[cache] = parsed
 
 	return parsed
-		.tap(data => debug('parsed to %o', data))
-		.tapCatch(e => debug('failed: %s', e.message))
 }
-
-function ContentTypeError() {
-	this.message = 'Content-Type must be "application/json"'
-}
-function ParsingError() {
-	this.message = 'Unable to parse JSON'
-}
-
-ContentTypeError.prototype = Object.create(Error.prototype)
-ParsingError.prototype = Object.create(Error.prototype)

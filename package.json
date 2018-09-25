@@ -15,9 +15,7 @@
 		"parse"
 	],
 	"dependencies": {
-		"bluebird": "^3.5.2",
-		"concat-stream": "^1.6.2",
-		"debug": "^4.0.1"
+		"get-stream": "^4.0.0"
 	},
 	"devDependencies": {
 		"prettier": "^1.14.3",

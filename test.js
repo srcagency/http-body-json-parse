@@ -12,12 +12,7 @@ const server = http
 
 		parse(request)
 			.then(json => response.end(JSON.stringify(json)))
-			.catch(parse.ContentTypeError, e =>
-				response.end('ContentTypeError: ' + e.message)
-			)
-			.catch(parse.ParsingError, e =>
-				response.end('ParsingError: ' + e.message)
-			)
+			.catch(e => response.end(e.name + ': ' + e.message))
 	})
 	.listen(0)
 
@@ -92,7 +87,7 @@ test('Throws on bad JSON', t => {
 	)
 })
 
-test('Handles request stream errors', t => {
+test('Forwards request stream errors', t => {
 	t.plan(1)
 
 	const fakeRequest = Object.assign(failingStream(), {
