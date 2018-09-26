@@ -5,10 +5,24 @@ Parse the JSON body of an http request.
 ## Usage
 
 ```js
+parse(
+  request, // like the one from Node.js http
+
+  /*
+  The maximum buffer size (bytes) before throwing a `parse.BufferError`.
+  This is optional but probably a good idea and defaults to `Infinity`.
+  */
+  maxBufferBytes,
+
+  console.log // Optional logging function defaults to a no-op
+)
+```
+
+```js
 const parse = require('http-body-json-parse')
 
 http.createServer((request, response) => {
-  parse(request, 50 /* bytes, optional */).then(console.log, e => {
+  parse(request, 50).then(console.log, e => {
     if (e instanceof parse.ContentTypeError) console.error(e.message)
     else if (e instanceof parse.ParsingError) console.error(e.message)
     else if (e instanceof parse.BufferError) console.error(e.message)
