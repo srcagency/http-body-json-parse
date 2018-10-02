@@ -15,7 +15,7 @@
 		"parse"
 	],
 	"dependencies": {
-		"get-stream": "^4.0.0"
+		"get-stream": "^4.1.0"
 	},
 	"devDependencies": {
 		"prettier": "^1.14.3",

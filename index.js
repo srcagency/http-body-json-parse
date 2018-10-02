@@ -51,8 +51,10 @@ function parse(request, maxBuffer = Infinity, log = () => {}) {
 			}
 		},
 		e => {
-			if (e.message !== 'maxBuffer exceeded') return Promise.reject(e)
-			return Promise.reject(new BufferError())
+			if (e instanceof getStream.MaxBufferError) {
+				return Promise.reject(new BufferError())
+			}
+			return Promise.reject(e)
 		}
 	)
 
