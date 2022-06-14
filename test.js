@@ -67,6 +67,32 @@ test('Throws on bad content type', t => {
 	)
 })
 
+test('Support content type directives', t => {
+	t.plan(1)
+
+	const dummy = {
+		key: 'value',
+		root: {
+			leaf: 'value',
+		},
+	}
+
+	host.then(host =>
+		request(
+			{
+				method: 'POST',
+				uri: host,
+				headers: {
+					'Content-Type': 'application/json; charset=utf-8',
+				},
+				json: true,
+				body: dummy,
+			},
+			(err, res, body) => t.deepEqual(body, dummy)
+		)
+	)
+})
+
 test('Throws on bad JSON', t => {
 	t.plan(1)
 
