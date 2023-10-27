@@ -67,6 +67,26 @@ test('Throws on bad content type', t => {
 	)
 })
 
+test('Throws on missing content type header', t => {
+	t.plan(1)
+
+	host.then(host =>
+		request(
+			{
+				method: 'POST',
+				uri: host,
+				headers: {},
+				body: '...',
+			},
+			(err, res, body) =>
+				t.equal(
+					body,
+					'ContentTypeError: Content-Type must be "application/json"'
+				)
+		)
+	)
+})
+
 test('Support content type directives', t => {
 	t.plan(1)
 

@@ -34,9 +34,9 @@ module.exports = parse
 function parse(request, maxBuffer = Infinity, log = () => {}) {
 	if (request[parsing] !== undefined) return request[parsing]
 	const contentTypeDirectives = request.headers['content-type']
-		.split(';')
+		?.split(';')
 		.map(d => d.trim())
-	if (!contentTypeDirectives.includes('application/json')) {
+	if (!contentTypeDirectives?.includes('application/json')) {
 		return Promise.reject(new ContentTypeError())
 	}
 
